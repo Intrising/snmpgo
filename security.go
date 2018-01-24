@@ -10,6 +10,7 @@ import (
 	"crypto/sha1"
 	"encoding/asn1"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"hash"
 	"math"
@@ -44,6 +45,7 @@ func (c *community) GenerateRequestMessage(sendMsg message) (err error) {
 	if err != nil {
 		return
 	}
+	fmt.Println("GenerateRequestMessage", hex.Dump(b))
 	m.SetPduBytes(b)
 
 	return

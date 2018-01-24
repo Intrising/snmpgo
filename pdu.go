@@ -15,6 +15,7 @@ type VarBind struct {
 }
 
 func (v *VarBind) Marshal() (b []byte, err error) {
+	fmt.Println("VarBind Marshal")
 	var buf []byte
 	raw := asn1.RawValue{Class: classUniversal, Tag: tagSequence, IsCompound: true}
 
@@ -191,6 +192,15 @@ type PduV1 struct {
 	errorStatus ErrorStatus
 	errorIndex  int
 	varBinds    VarBinds
+}
+
+type TrapPduV1 struct {
+	Enterprise       string
+	AgentAddr        string
+	GenericTrap      int
+	SpecificTrap     int
+	TimeStamp        int
+	VariableBindings int
 }
 
 func (pdu *PduV1) PduType() PduType {

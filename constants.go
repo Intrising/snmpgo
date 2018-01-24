@@ -36,6 +36,7 @@ const (
 	GetBulkRequest
 	InformRequest
 	SNMPTrapV2
+	SNMPTrapV1
 	Report
 )
 
@@ -57,6 +58,8 @@ func (t PduType) String() string {
 		return "InformRequest"
 	case SNMPTrapV2:
 		return "SNMPTrapV2"
+	case SNMPTrapV1:
+		return "SNMPTrapV1"
 	case Report:
 		return "Report"
 	default:
@@ -274,6 +277,7 @@ func (r reportStatusOid) String() string {
 }
 
 var (
-	OidSysUpTime = MustNewOid("1.3.6.1.2.1.1.3.0")
-	OidSnmpTrap  = MustNewOid("1.3.6.1.6.3.1.1.4.1.0")
+	OidSysUpTime          = MustNewOid("1.3.6.1.2.1.1.3.0")
+	OidSnmpTrap           = MustNewOid("1.3.6.1.6.3.1.1.4.1.0")
+	OidSnmpTrapEnterprise = MustNewOid("1.3.6.1.6.3.1.1.4.3.0")
 )

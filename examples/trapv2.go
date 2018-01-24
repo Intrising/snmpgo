@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/k-sone/snmpgo"
+	"../../snmpgo"
 )
 
-func main() {
+func test() {
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
 		Version:   snmpgo.V2c,
-		Address:   "127.0.0.1:162",
+		Address:   "192.168.16.254:162",
 		Retries:   1,
 		Community: "public",
 	})
@@ -44,4 +44,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+}
+
+func main() {
+	test()
 }
