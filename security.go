@@ -13,6 +13,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash"
+	"log"
 	"math"
 	"sync"
 	"time"
@@ -520,8 +521,10 @@ func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit 
 	} else {
 		chiperKey = 16
 	}
+	log.Println("==============key:", len(ley))
 	block, err := aes.NewCipher(key[:chiperKey])
 	if err != nil {
+		log.Println("encryptAES:", err)
 		return
 	}
 
@@ -538,6 +541,9 @@ func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit 
 
 	mode := cipher.NewCFBEncrypter(block, iv)
 	mode.XORKeyStream(dst, src)
+	log.Println("dst:", dst)
+	log.Println("priParam:", privParam)
+	log.Panicln("err:", err)
 	return
 }
 
