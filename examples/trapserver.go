@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"snmpgo"
+	"../../snmpgo"
 )
 
 type TrapListener struct {

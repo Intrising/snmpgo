@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"snmpgo"
+	"../../snmpgo"
 )
 
 func test() {
