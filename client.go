@@ -92,7 +92,7 @@ func (a *SNMPArguments) validate() error {
 					Message: "PrivPassword is at least 8 characters in length",
 				}
 			}
-			if p := a.PrivProtocol; p != Des && p != Aes {
+			if p := a.PrivProtocol; p != Des && p != Aes && p != Aes192 && p != Aes256 {
 				return &ArgumentError{
 					Value:   a.PrivProtocol,
 					Message: "Illegal PrivProtocol",

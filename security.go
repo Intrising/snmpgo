@@ -414,8 +414,11 @@ func encrypt(msg *messageV3, proto PrivProtocol, key []byte) (err error) {
 	case Des:
 		dst, priv, err = encryptDES(src, key, int32(msg.AuthEngineBoots), genSalt32())
 	case Aes:
-		dst, priv, err = encryptAES(
-			src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64())
+		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 128)
+	case Aes192:
+		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 192)
+	case Aes256:
+		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 256)
 	}
 	if err != nil {
 		return
@@ -507,10 +510,17 @@ func decryptDES(src, key, privParam []byte) (dst []byte, err error) {
 	return
 }
 
-func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64) (
+func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit int) (
 	dst, privParam []byte, err error) {
-
-	block, err := aes.NewCipher(key[:16])
+	var chiperKey int
+	if bit == 192 {
+		chiperKey = 24
+	} else if bit == 256 {
+		chiperKey = 32
+	} else {
+		chiperKey = 16
+	}
+	block, err := aes.NewCipher(key[:chiperKey])
 	if err != nil {
 		return
 	}

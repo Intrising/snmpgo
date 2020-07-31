@@ -167,8 +167,10 @@ const (
 type PrivProtocol string
 
 const (
-	Des PrivProtocol = "DES"
-	Aes PrivProtocol = "AES"
+	Des    PrivProtocol = "DES"
+	Aes    PrivProtocol = "AES"
+	Aes192 PrivProtocol = "AES192"
+	Aes256 PrivProtocol = "AES256"
 )
 
 type securityModel int
