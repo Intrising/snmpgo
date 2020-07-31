@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"../../snmpgo"
+	"snmpgo"
 )
 
 func test() {
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
 		Version:   snmpgo.V2c,
-		Address:   "192.168.16.254:162",
+		Address:   "127.0.0.1:162",
 		Retries:   1,
 		Community: "public",
 	})

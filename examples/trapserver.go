@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/k-sone/snmpgo"
+	"snmpgo"
 )
 
 type TrapListener struct {
@@ -29,7 +29,7 @@ func main() {
 		LocalAddr: "127.0.0.1:162",
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("A", err)
 	}
 
 	// V2c
@@ -48,7 +48,7 @@ func main() {
 		AuthPassword:     "aaaaaaaa",
 		AuthProtocol:     snmpgo.Sha,
 		PrivPassword:     "bbbbbbbb",
-		PrivProtocol:     snmpgo.Aes,
+		PrivProtocol:     snmpgo.Aes192,
 		SecurityEngineId: "8000000004736e6d70676f",
 	})
 	if err != nil {

@@ -2,7 +2,6 @@ package snmpgo
 
 import (
 	"encoding/asn1"
-	"encoding/hex"
 	"fmt"
 	"math"
 	"net"
@@ -95,7 +94,7 @@ func (a *SNMPArguments) validate() error {
 			if p := a.PrivProtocol; p != Des && p != Aes && p != Aes192 && p != Aes256 {
 				return &ArgumentError{
 					Value:   a.PrivProtocol,
-					Message: "Illegal PrivProtocol",
+					Message: "Illegal PrivProtocolA",
 				}
 			}
 		}
@@ -354,7 +353,7 @@ func (s *SNMP) V1Trap(varPduV1 TrapPduV1) (err error) {
 	raw.Bytes[dataTrapLength-1] = (byte)(len(raw.Bytes) - dataTrapLength)
 
 	marbuf, _ := asn1.Marshal(raw)
-	fmt.Println(hex.Dump(marbuf))
+	// fmt.Println(hex.Dump(marbuf))
 
 	s.conn.SetWriteDeadline(time.Now().Add(s.args.Timeout))
 	_, err = s.conn.Write(marbuf[:len(marbuf)])
@@ -395,7 +394,7 @@ func (s *SNMP) InformRequest(varBinds VarBinds) error {
 }
 
 func (s *SNMP) v2trap(pduType PduType, varBinds VarBinds) (err error) {
-	fmt.Println("v2trap")
+	// fmt.Println("v2trap")
 	if s.args.Version < V2c {
 		return &ArgumentError{
 			Value:   s.args.Version,
@@ -409,7 +408,7 @@ func (s *SNMP) v2trap(pduType PduType, varBinds VarBinds) (err error) {
 }
 
 func (s *SNMP) sendPdu(pdu Pdu) (result Pdu, err error) {
-	fmt.Println("sendPdu")
+	// fmt.Println("sendPdu")
 	if err = s.Open(); err != nil {
 		return
 	}

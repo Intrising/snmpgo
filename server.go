@@ -110,10 +110,10 @@ func (a *SecurityEntry) validate() error {
 					Message: "PrivPassword is at least 8 characters in length",
 				}
 			}
-			if p := a.PrivProtocol; p != Des && p != Aes {
+			if p := a.PrivProtocol; p != Des && p != Aes && p != Aes192 && p != Aes256 {
 				return &ArgumentError{
 					Value:   a.PrivProtocol,
-					Message: "Illegal PrivProtocol",
+					Message: "Illegal PrivProtocolB",
 				}
 			}
 		}
@@ -287,9 +287,7 @@ func (s *TrapServer) handle(listener TrapListener, conn interface{}, msg message
 			pdu = nil
 		}
 	}
-
 	listener.OnTRAP(&TrapRequest{Pdu: pdu, Source: src, Error: err})
-
 	if pdu != nil && pdu.PduType() == InformRequest {
 		if err = s.informResponse(conn, src, mp, sec, msg); err != nil && s.serving {
 			s.logf("trap: failed to send response %v: %v", src, err)

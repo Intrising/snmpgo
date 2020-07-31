@@ -42,8 +42,8 @@ func (msg *messageV1) SetPduBytes(b []byte) {
 }
 
 func (msg *messageV1) Marshal() (b []byte, err error) {
-	fmt.Println("Marshal")
-	fmt.Println(hex.Dump(msg.pduBytes))
+	// fmt.Println("Marshal")
+	// fmt.Println(hex.Dump(msg.pduBytes))
 	var buf []byte
 	raw := asn1.RawValue{Class: classUniversal, Tag: tagSequence, IsCompound: true}
 

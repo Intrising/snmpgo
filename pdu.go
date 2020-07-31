@@ -15,7 +15,7 @@ type VarBind struct {
 }
 
 func (v *VarBind) Marshal() (b []byte, err error) {
-	fmt.Println("VarBind Marshal")
+	// fmt.Println("VarBind Marshal")
 	var buf []byte
 	raw := asn1.RawValue{Class: classUniversal, Tag: tagSequence, IsCompound: true}
 
@@ -303,25 +303,21 @@ func (pdu *PduV1) Unmarshal(b []byte) (rest []byte, err error) {
 	}
 
 	next := raw.Bytes
-
 	var requestId int
 	next, err = ber.Unmarshal(next, &requestId)
 	if err != nil {
 		return
 	}
-
 	var errorStatus int
 	next, err = ber.Unmarshal(next, &errorStatus)
 	if err != nil {
 		return
 	}
-
 	var errorIndex int
 	next, err = ber.Unmarshal(next, &errorIndex)
 	if err != nil {
 		return
 	}
-
 	var varBinds asn1.RawValue
 	_, err = ber.Unmarshal(next, &varBinds)
 	if err != nil {
@@ -342,7 +338,6 @@ func (pdu *PduV1) Unmarshal(b []byte) (rest []byte, err error) {
 		}
 		pdu.varBinds = append(pdu.varBinds, &varBind)
 	}
-
 	pdu.pduType = PduType(raw.Tag)
 	pdu.requestId = requestId
 	pdu.errorStatus = ErrorStatus(errorStatus)
@@ -395,6 +390,7 @@ func (pdu *ScopedPdu) Unmarshal(b []byte) (rest []byte, err error) {
 	var raw asn1.RawValue
 	rest, err = ber.Unmarshal(b, &raw)
 	if err != nil {
+		fmt.Printf("(pdu *ScopedPdu) Unmarshal:", err)
 		return nil, err
 	}
 	if raw.Class != classUniversal || raw.Tag != tagSequence || !raw.IsCompound {
@@ -402,7 +398,6 @@ func (pdu *ScopedPdu) Unmarshal(b []byte) (rest []byte, err error) {
 			"Invalid ScopedPud object - Class [%02x], Tag [%02x] : [%s]",
 			raw.Class, raw.Tag, toHexStr(b, " "))}
 	}
-
 	next := raw.Bytes
 
 	var contextEngineId []byte

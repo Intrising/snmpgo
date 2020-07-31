@@ -7,13 +7,11 @@ import (
 	"crypto/des"
 	"crypto/hmac"
 	"crypto/md5"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/asn1"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"hash"
-	"log"
 	"math"
 	"sync"
 	"time"
@@ -46,7 +44,7 @@ func (c *community) GenerateRequestMessage(sendMsg message) (err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("GenerateRequestMessage", hex.Dump(b))
+	// fmt.Println("GenerateRequestMessage", hex.Dump(b))
 	m.SetPduBytes(b)
 
 	return
@@ -67,7 +65,6 @@ func (c *community) ProcessIncomingMessage(recvMsg message) (err error) {
 			Detail: fmt.Sprintf("Message - [%s]", rm),
 		}
 	}
-
 	_, err = rm.Pdu().Unmarshal(rm.PduBytes())
 	if err != nil {
 		return &MessageError{
@@ -187,7 +184,6 @@ func (u *usm) GenerateResponseMessage(sendMsg message) (err error) {
 
 func (u *usm) ProcessIncomingMessage(recvMsg message) (err error) {
 	rm := recvMsg.(*messageV3)
-
 	// RFC3411 Section 5
 	if l := len(rm.AuthEngineId); l < 5 || l > 32 {
 		return &MessageError{
@@ -336,9 +332,11 @@ func (u *usm) SetAuthEngineId(authEngineId []byte) {
 	u.AuthEngineId = authEngineId
 	if len(u.AuthPassword) > 0 {
 		u.AuthKey = passwordToKey(u.AuthProtocol, u.AuthPassword, authEngineId)
+
 	}
 	if len(u.PrivPassword) > 0 {
 		u.PrivKey = passwordToKey(u.AuthProtocol, u.PrivPassword, authEngineId)
+
 	}
 }
 
@@ -401,7 +399,7 @@ func mac(msg *messageV3, proto AuthProtocol, key []byte) ([]byte, error) {
 	case Md5:
 		h = hmac.New(md5.New, key)
 	case Sha:
-		h = hmac.New(sha1.New, key)
+		h = hmac.New(sha256.New, key)
 	}
 	h.Write(msgBytes)
 	return h.Sum(nil)[:12], nil
@@ -424,7 +422,9 @@ func encrypt(msg *messageV3, proto PrivProtocol, key []byte) (err error) {
 	if err != nil {
 		return
 	}
-
+	// log.Println("src:", hex.EncodeToString(dst))
+	// log.Println("Pri:", hex.EncodeToString(priv))
+	// log.Println("err:", err)
 	raw := asn1.RawValue{Class: classUniversal, Tag: tagOctetString, IsCompound: false}
 	raw.Bytes = dst
 	dst, err = asn1.Marshal(raw)
@@ -452,8 +452,11 @@ func decrypt(msg *messageV3, proto PrivProtocol, key, privParam []byte) (err err
 	case Des:
 		dst, err = decryptDES(raw.Bytes, key, privParam)
 	case Aes:
-		dst, err = decryptAES(
-			raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime))
+		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 128)
+	case Aes192:
+		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 192)
+	case Aes256:
+		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 256)
 	}
 
 	if err == nil {
@@ -511,7 +514,7 @@ func decryptDES(src, key, privParam []byte) (dst []byte, err error) {
 	return
 }
 
-func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit int) (
+func EncryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit int) (
 	dst, privParam []byte, err error) {
 	var chiperKey int
 	if bit == 192 {
@@ -521,10 +524,13 @@ func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit 
 	} else {
 		chiperKey = 16
 	}
-	log.Println("==============key:", len(ley))
-	block, err := aes.NewCipher(key[:chiperKey])
+	key2 := make([]byte, 32)
+	for i, val := range key {
+		key2[i] = val
+	}
+	// log.Println("=======LEN:", len(key), key)
+	block, err := aes.NewCipher(key2[:chiperKey])
 	if err != nil {
-		log.Println("encryptAES:", err)
 		return
 	}
 
@@ -541,15 +547,55 @@ func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit 
 
 	mode := cipher.NewCFBEncrypter(block, iv)
 	mode.XORKeyStream(dst, src)
-	log.Println("dst:", dst)
-	log.Println("priParam:", privParam)
-	log.Panicln("err:", err)
 	return
 }
 
-func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32) (
-	dst []byte, err error) {
+func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit int) (
+	dst, privParam []byte, err error) {
+	// fmt.Println("Key", key)
+	var chiperKey int
+	if bit == 192 {
+		chiperKey = 24
+	} else if bit == 256 {
+		chiperKey = 32
+	} else {
+		chiperKey = 16
+	}
+	key2 := make([]byte, 32)
+	for i, val := range key {
+		key2[i] = val
+	}
+	// log.Println("=======LEN:", len(key), key)
+	// fmt.Println("CHPI:", chiperKey)
+	block, err := aes.NewCipher(key2[:chiperKey])
+	if err != nil {
+		return
+	}
 
+	var buf1, buf2 bytes.Buffer
+	binary.Write(&buf1, binary.BigEndian, salt)
+	privParam = buf1.Bytes()
+
+	binary.Write(&buf2, binary.BigEndian, engineBoots)
+	binary.Write(&buf2, binary.BigEndian, engineTime)
+	iv := append(buf2.Bytes(), privParam...)
+	src = padding(src, aes.BlockSize)
+	dst = make([]byte, len(src))
+	// fmt.Println("Block:", block, iv)
+	mode := cipher.NewCFBEncrypter(block, iv)
+	mode.XORKeyStream(dst, src)
+	// fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
+	// fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
+	// fmt.Println("B", key)
+	fmt.Println(privParam)
+	return
+}
+
+func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, bit int) (
+	dst []byte, err error) {
+	// fmt.Println("Key", key)
+	// fmt.Println("============")
+	var chiperKey int
 	if len(privParam) != 8 {
 		err = &ArgumentError{
 			Value:   len(privParam),
@@ -557,8 +603,19 @@ func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32) (
 		}
 		return
 	}
-
-	block, err := aes.NewCipher(key[:16])
+	if bit == 192 {
+		chiperKey = 24
+	} else if bit == 256 {
+		chiperKey = 32
+	} else {
+		chiperKey = 16
+	}
+	key2 := make([]byte, 32)
+	for i, val := range key {
+		key2[i] = val
+	}
+	// fmt.Println("CHPI:", chiperKey)
+	block, err := aes.NewCipher(key2[:chiperKey])
 	if err != nil {
 		return
 	}
@@ -569,9 +626,13 @@ func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32) (
 	iv := append(buf.Bytes(), privParam...)
 
 	dst = make([]byte, len(src))
-
+	// fmt.Println("Block:", block, iv)
 	mode := cipher.NewCFBDecrypter(block, iv)
 	mode.XORKeyStream(dst, src)
+	// fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
+	// fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
+	// fmt.Println("B", key)
+	// fmt.Println(privParam)
 	return
 }
 
@@ -581,9 +642,8 @@ func passwordToKey(proto AuthProtocol, password string, engineId []byte) []byte 
 	case Md5:
 		h = md5.New()
 	case Sha:
-		h = sha1.New()
+		h = sha256.New()
 	}
-
 	pass := []byte(password)
 	plen := len(pass)
 	for i := mega / plen; i > 0; i-- {

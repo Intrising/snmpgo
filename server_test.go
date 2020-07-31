@@ -19,10 +19,10 @@ func (t *receiveQueue) OnTRAP(trap *snmpgo.TrapRequest) {
 }
 
 // takeNextTrap blocks till next trap is received
-func (n *receiveQueue) takeNextTrap() *snmpgo.TrapRequest {
+func (t *receiveQueue) takeNextTrap() *snmpgo.TrapRequest {
 	limit := time.Duration(2 * time.Second)
 	select {
-	case m := <-n.msg:
+	case m := <-t.msg:
 		return m
 	case <-time.After(limit):
 		return nil

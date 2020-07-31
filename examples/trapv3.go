@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/k-sone/snmpgo"
+	"snmpgo"
 )
 
 func main() {
@@ -19,12 +18,12 @@ func main() {
 		AuthPassword:     "aaaaaaaa",
 		AuthProtocol:     snmpgo.Sha,
 		PrivPassword:     "bbbbbbbb",
-		PrivProtocol:     snmpgo.Aes,
+		PrivProtocol:     snmpgo.Aes192,
 		SecurityEngineId: "8000000004736e6d70676f",
 	})
 	if err != nil {
 		// Failed to create snmpgo.SNMP object
-		fmt.Println(err)
+		fmt.Println("A", err)
 		return
 	}
 

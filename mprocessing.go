@@ -69,7 +69,6 @@ func (mp *messageProcessingV1) PrepareDataElements(
 			Detail: fmt.Sprintf("%s vs %s", sendMsg, recvMsg),
 		}
 	}
-
 	if err := sec.ProcessIncomingMessage(recvMsg); err != nil {
 		return nil, err
 	}
