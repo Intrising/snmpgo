@@ -528,16 +528,6 @@ func decryptDES(src, key, privParam []byte) (dst []byte, err error) {
 
 func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, chiperKey int) (
 	dst, privParam []byte, err error) {
-	// fmt.Println("=======LEN:", len(key), key)
-	// if chiperKey > aes.BlockSize {
-	// 	sub := chiperKey - aes.BlockSize
-	// 	for i := aes.BlockSize; i < chiperKey; i++ {
-	// 		key2[i] = byte(sub)
-	// 	}
-	// }
-	//fmt.Println("key", key[:chiperKey])
-	// log.Println("=======LEN:", len(key), key)
-	// fmt.Println("CHPI:", chiperKey)
 	block, err := aes.NewCipher(key[:chiperKey])
 	if err != nil {
 		fmt.Println("err", err)
@@ -551,16 +541,10 @@ func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, chip
 	binary.Write(&buf2, binary.BigEndian, engineBoots)
 	binary.Write(&buf2, binary.BigEndian, engineTime)
 	iv := append(buf2.Bytes(), privParam...) //16byte
-	//fmt.Println("Send iv:", "len", len(iv), hex.EncodeToString(iv))
 	src = padding(src, aes.BlockSize)
 	dst = make([]byte, len(src))
-	// fmt.Println("Block:", block, iv)
 	mode := cipher.NewCFBEncrypter(block, iv)
 	mode.XORKeyStream(dst, src)
-	//fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
-	//fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
-	// fmt.Println("B", key)
-	fmt.Println(privParam)
 	return
 }
 
@@ -573,7 +557,6 @@ func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, chipe
 		}
 		return
 	}
-	//fmt.Println("key2", key[:chiperKey])
 	block, err := aes.NewCipher(key[:chiperKey])
 	if err != nil {
 		return
@@ -583,16 +566,9 @@ func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, chipe
 	binary.Write(&buf, binary.BigEndian, engineBoots)
 	binary.Write(&buf, binary.BigEndian, engineTime)
 	iv := append(buf.Bytes(), privParam...)
-	// fmt.Println("Siez:", block)
 	dst = make([]byte, len(src))
 	mode := cipher.NewCFBDecrypter(block, iv)
 	mode.XORKeyStream(dst, src)
-	// fmt.Println("")
-	// fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
-	// fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
-	// fmt.Println("")
-	// fmt.Println("B", key)
-	// fmt.Println(privParam)
 	return
 }
 
@@ -630,10 +606,8 @@ func passwordToKey(proto AuthProtocol, password string, engineId []byte, isAES b
 			h2 = sha256.New()
 		}
 		h2.Write(h.Sum(nil))
-		fmt.Println("Double")
 		return append(h.Sum(nil), h2.Sum(nil)...)
 	}
-	fmt.Println("Once")
 	return h.Sum(nil)
 }
 
