@@ -1,4 +1,4 @@
-module snmpgo
+module github.com/Intrising/snmpgo
 
 go 1.14
 
