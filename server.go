@@ -104,6 +104,7 @@ func (a *SecurityEntry) validate() error {
 		}
 		if a.SecurityLevel > AuthNoPriv {
 			// RFC3414 Section 11.2
+			fmt.Println("password",a.PrivPassword)
 			if len(a.PrivPassword) < 8 {
 				return &ArgumentError{
 					Value:   a.PrivPassword,

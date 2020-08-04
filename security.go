@@ -331,11 +331,15 @@ func (u *usm) Discover(snmp *SNMP) (err error) {
 func (u *usm) SetAuthEngineId(authEngineId []byte) {
 	u.AuthEngineId = authEngineId
 	if len(u.AuthPassword) > 0 {
-		u.AuthKey = passwordToKey(u.AuthProtocol, u.AuthPassword, authEngineId)
+		u.AuthKey = passwordToKey(u.AuthProtocol, u.AuthPassword, authEngineId, false)
 
 	}
 	if len(u.PrivPassword) > 0 {
-		u.PrivKey = passwordToKey(u.AuthProtocol, u.PrivPassword, authEngineId)
+		var tag bool = false
+		if u.PrivProtocol == Aes192 || u.PrivProtocol == Aes256 {
+			tag = true
+		}
+		u.PrivKey = passwordToKey(u.AuthProtocol, u.PrivPassword, authEngineId, tag)
 
 	}
 }
@@ -387,7 +391,11 @@ func (u *usm) String() string {
 
 func mac(msg *messageV3, proto AuthProtocol, key []byte) ([]byte, error) {
 	tmp := msg.AuthParameter
-	msg.AuthParameter = padding([]byte{}, 12)
+	if proto == Sha {
+		msg.AuthParameter = padding([]byte{}, 24)
+	} else {
+		msg.AuthParameter = padding([]byte{}, 12)
+	}
 	msgBytes, err := msg.Marshal()
 	msg.AuthParameter = tmp
 	if err != nil {
@@ -402,6 +410,9 @@ func mac(msg *messageV3, proto AuthProtocol, key []byte) ([]byte, error) {
 		h = hmac.New(sha256.New, key)
 	}
 	h.Write(msgBytes)
+	if proto == Sha {
+		return h.Sum(nil)[:24], nil
+	}
 	return h.Sum(nil)[:12], nil
 }
 
@@ -413,11 +424,11 @@ func encrypt(msg *messageV3, proto PrivProtocol, key []byte) (err error) {
 	case Des:
 		dst, priv, err = encryptDES(src, key, int32(msg.AuthEngineBoots), genSalt32())
 	case Aes:
-		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 128)
+		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 16)
 	case Aes192:
-		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 192)
+		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 24)
 	case Aes256:
-		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 256)
+		dst, priv, err = encryptAES(src, key, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), genSalt64(), 32)
 	}
 	if err != nil {
 		return
@@ -452,11 +463,12 @@ func decrypt(msg *messageV3, proto PrivProtocol, key, privParam []byte) (err err
 	case Des:
 		dst, err = decryptDES(raw.Bytes, key, privParam)
 	case Aes:
-		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 128)
+		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 16)
 	case Aes192:
-		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 192)
+		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 24)
+	// dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 192)
 	case Aes256:
-		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 256)
+		dst, err = decryptAES(raw.Bytes, key, privParam, int32(msg.AuthEngineBoots), int32(msg.AuthEngineTime), 32)
 	}
 
 	if err == nil {
@@ -514,61 +526,25 @@ func decryptDES(src, key, privParam []byte) (dst []byte, err error) {
 	return
 }
 
-func EncryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit int) (
+func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, chiperKey int) (
 	dst, privParam []byte, err error) {
-	var chiperKey int
-	if bit == 192 {
-		chiperKey = 24
-	} else if bit == 256 {
-		chiperKey = 32
-	} else {
-		chiperKey = 16
-	}
+	// fmt.Println("=======LEN:", len(key), key)
 	key2 := make([]byte, 32)
 	for i, val := range key {
 		key2[i] = val
 	}
-	// log.Println("=======LEN:", len(key), key)
-	block, err := aes.NewCipher(key2[:chiperKey])
-	if err != nil {
-		return
-	}
-
-	var buf1, buf2 bytes.Buffer
-	binary.Write(&buf1, binary.BigEndian, salt)
-	privParam = buf1.Bytes()
-
-	binary.Write(&buf2, binary.BigEndian, engineBoots)
-	binary.Write(&buf2, binary.BigEndian, engineTime)
-	iv := append(buf2.Bytes(), privParam...)
-
-	src = padding(src, aes.BlockSize)
-	dst = make([]byte, len(src))
-
-	mode := cipher.NewCFBEncrypter(block, iv)
-	mode.XORKeyStream(dst, src)
-	return
-}
-
-func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit int) (
-	dst, privParam []byte, err error) {
-	// fmt.Println("Key", key)
-	var chiperKey int
-	if bit == 192 {
-		chiperKey = 24
-	} else if bit == 256 {
-		chiperKey = 32
-	} else {
-		chiperKey = 16
-	}
-	key2 := make([]byte, 32)
-	for i, val := range key {
-		key2[i] = val
-	}
+	// if chiperKey > aes.BlockSize {
+	// 	sub := chiperKey - aes.BlockSize
+	// 	for i := aes.BlockSize; i < chiperKey; i++ {
+	// 		key2[i] = byte(sub)
+	// 	}
+	// }
+	//fmt.Println("key", key[:chiperKey])
 	// log.Println("=======LEN:", len(key), key)
 	// fmt.Println("CHPI:", chiperKey)
-	block, err := aes.NewCipher(key2[:chiperKey])
+	block, err := aes.NewCipher(key[:chiperKey])
 	if err != nil {
+		fmt.Println("err", err)
 		return
 	}
 
@@ -578,24 +554,22 @@ func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, bit 
 
 	binary.Write(&buf2, binary.BigEndian, engineBoots)
 	binary.Write(&buf2, binary.BigEndian, engineTime)
-	iv := append(buf2.Bytes(), privParam...)
+	iv := append(buf2.Bytes(), privParam...) //16byte
+	//fmt.Println("Send iv:", "len", len(iv), hex.EncodeToString(iv))
 	src = padding(src, aes.BlockSize)
 	dst = make([]byte, len(src))
 	// fmt.Println("Block:", block, iv)
 	mode := cipher.NewCFBEncrypter(block, iv)
 	mode.XORKeyStream(dst, src)
-	// fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
-	// fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
+	//fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
+	//fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
 	// fmt.Println("B", key)
 	fmt.Println(privParam)
 	return
 }
 
-func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, bit int) (
+func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, chiperKey int) (
 	dst []byte, err error) {
-	// fmt.Println("Key", key)
-	// fmt.Println("============")
-	var chiperKey int
 	if len(privParam) != 8 {
 		err = &ArgumentError{
 			Value:   len(privParam),
@@ -603,19 +577,8 @@ func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, bit i
 		}
 		return
 	}
-	if bit == 192 {
-		chiperKey = 24
-	} else if bit == 256 {
-		chiperKey = 32
-	} else {
-		chiperKey = 16
-	}
-	key2 := make([]byte, 32)
-	for i, val := range key {
-		key2[i] = val
-	}
-	// fmt.Println("CHPI:", chiperKey)
-	block, err := aes.NewCipher(key2[:chiperKey])
+	//fmt.Println("key2", key[:chiperKey])
+	block, err := aes.NewCipher(key[:chiperKey])
 	if err != nil {
 		return
 	}
@@ -624,20 +587,25 @@ func decryptAES(src, key, privParam []byte, engineBoots, engineTime int32, bit i
 	binary.Write(&buf, binary.BigEndian, engineBoots)
 	binary.Write(&buf, binary.BigEndian, engineTime)
 	iv := append(buf.Bytes(), privParam...)
-
+	// fmt.Println("Siez:", block)
 	dst = make([]byte, len(src))
-	// fmt.Println("Block:", block, iv)
 	mode := cipher.NewCFBDecrypter(block, iv)
 	mode.XORKeyStream(dst, src)
+	// fmt.Println("")
 	// fmt.Println("Send Src:", "len", len(src), hex.EncodeToString(src))
 	// fmt.Println("Send Dst:", "len", len(dst), hex.EncodeToString(dst))
+	// fmt.Println("")
 	// fmt.Println("B", key)
 	// fmt.Println(privParam)
 	return
 }
 
-func passwordToKey(proto AuthProtocol, password string, engineId []byte) []byte {
-	var h hash.Hash
+func passwordToKey(proto AuthProtocol, password string, engineId []byte, isAES bool) []byte {
+	var (
+		h  hash.Hash
+		h2 hash.Hash
+	)
+
 	switch proto {
 	case Md5:
 		h = md5.New()
@@ -654,11 +622,22 @@ func passwordToKey(proto AuthProtocol, password string, engineId []byte) []byte 
 		h.Write(pass[:remain])
 	}
 	ku := h.Sum(nil)
-
 	h.Reset()
 	h.Write(ku)
 	h.Write(engineId)
 	h.Write(ku)
+	if isAES == true {
+		switch proto {
+		case Md5:
+			h2 = md5.New()
+		case Sha:
+			h2 = sha256.New()
+		}
+		h2.Write(h.Sum(nil))
+		fmt.Println("Double")
+		return append(h.Sum(nil), h2.Sum(nil)...)
+	}
+	fmt.Println("Once")
 	return h.Sum(nil)
 }
 

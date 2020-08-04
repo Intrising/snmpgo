@@ -3,6 +3,7 @@ package snmpgo
 import (
 	"encoding/asn1"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
@@ -390,7 +391,7 @@ func (pdu *ScopedPdu) Unmarshal(b []byte) (rest []byte, err error) {
 	var raw asn1.RawValue
 	rest, err = ber.Unmarshal(b, &raw)
 	if err != nil {
-		fmt.Printf("(pdu *ScopedPdu) Unmarshal:", err)
+		log.Println("(pdu *ScopedPdu) Unmarshal:", err)
 		return nil, err
 	}
 	if raw.Class != classUniversal || raw.Tag != tagSequence || !raw.IsCompound {

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"../../snmpgo"
+	"snmpgo"
 )
 
 func main() {
@@ -14,11 +14,11 @@ func main() {
 		Version:          snmpgo.V3,
 		Address:          "127.0.0.1:162",
 		Retries:          1,
-		UserName:         "MyName",
-		SecurityLevel:    snmpgo.AuthPriv,
-		AuthPassword:     "aaaaaaaa",
+		UserName:         "user",
+		SecurityLevel:    snmpgo.AuthNoPriv,
+		AuthPassword:     "88888888",
 		AuthProtocol:     snmpgo.Sha,
-		PrivPassword:     "bbbbbbbb",
+		PrivPassword:     "88888888",
 		PrivProtocol:     snmpgo.Aes192,
 		SecurityEngineId: "8000000004736e6d70676f",
 	})

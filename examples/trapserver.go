@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"../../snmpgo"
+	"snmpgo"
 )
 
 type TrapListener struct {
@@ -26,7 +26,7 @@ func NewTrapListener() *TrapListener {
 
 func main() {
 	server, err := snmpgo.NewTrapServer(snmpgo.ServerArguments{
-		LocalAddr: "127.0.0.1:162",
+		LocalAddr: "127.0.0.1:161",
 	})
 	if err != nil {
 		log.Printf("A", err)
@@ -43,12 +43,12 @@ func main() {
 	// V3
 	err = server.AddSecurity(&snmpgo.SecurityEntry{
 		Version:          snmpgo.V3,
-		UserName:         "MyName",
+		UserName:         "user",
 		SecurityLevel:    snmpgo.AuthPriv,
-		AuthPassword:     "aaaaaaaa",
+		AuthPassword:     "88888888",
 		AuthProtocol:     snmpgo.Sha,
-		PrivPassword:     "bbbbbbbb",
-		PrivProtocol:     snmpgo.Aes192,
+		PrivPassword:     "88888888",
+		PrivProtocol:     snmpgo.Aes256,
 		SecurityEngineId: "8000000004736e6d70676f",
 	})
 	if err != nil {
