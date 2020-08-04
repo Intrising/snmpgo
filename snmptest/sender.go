@@ -3,7 +3,7 @@ package snmptest
 import (
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 type TrapSender struct {

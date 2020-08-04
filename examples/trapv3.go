@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func main() {

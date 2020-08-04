@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 type TrapListener struct {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 var hexPrefix *regexp.Regexp = regexp.MustCompile(`^0[xX]`)

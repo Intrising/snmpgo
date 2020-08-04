@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func testVarBind(t *testing.T, v *snmpgo.VarBind, expStr string) {

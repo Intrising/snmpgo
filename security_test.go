@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 // RFC3414 A.3

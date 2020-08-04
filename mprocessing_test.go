@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func TestMessageProcessingV1Request(t *testing.T) {

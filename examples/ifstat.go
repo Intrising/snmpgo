@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 var sysDescr *snmpgo.Oid = snmpgo.MustNewOid("1.3.6.1.2.1.1.1")

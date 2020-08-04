@@ -3,7 +3,7 @@ package snmpgo_test
 import (
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func TestCheckPdu(t *testing.T) {

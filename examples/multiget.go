@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func get(agent string, oids snmpgo.Oids) {

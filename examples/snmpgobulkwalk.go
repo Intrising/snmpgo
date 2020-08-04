@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 var nonRepeaters int

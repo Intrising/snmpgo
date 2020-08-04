@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func TestInteger(t *testing.T) {

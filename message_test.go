@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func TestMessageV1(t *testing.T) {

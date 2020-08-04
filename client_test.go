@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func TestSNMPArguments(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/k-sone/snmpgo"
+	"github.com/Intrising/snmpgo"
 )
 
 func TestStripHexPrefix(t *testing.T) {

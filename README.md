@@ -43,7 +43,7 @@ package main
 import (
     "fmt"
 
-    "github.com/k-sone/snmpgo"
+    "github.com/Intrising/snmpgo"
 )
 
 func main() {
