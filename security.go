@@ -391,7 +391,7 @@ func (u *usm) String() string {
 
 func mac(msg *messageV3, proto AuthProtocol, key []byte) ([]byte, error) {
 	tmp := msg.AuthParameter
-	if proto == Sha {
+	if proto == Sha256 {
 		msg.AuthParameter = padding([]byte{}, 24)
 	} else {
 		msg.AuthParameter = padding([]byte{}, 12)
@@ -406,11 +406,11 @@ func mac(msg *messageV3, proto AuthProtocol, key []byte) ([]byte, error) {
 	switch proto {
 	case Md5:
 		h = hmac.New(md5.New, key)
-	case Sha:
+	case Sha256:
 		h = hmac.New(sha256.New, key)
 	}
 	h.Write(msgBytes)
-	if proto == Sha {
+	if proto == Sha256 {
 		return h.Sum(nil)[:24], nil
 	}
 	return h.Sum(nil)[:12], nil
@@ -609,7 +609,7 @@ func passwordToKey(proto AuthProtocol, password string, engineId []byte, isAES b
 	switch proto {
 	case Md5:
 		h = md5.New()
-	case Sha:
+	case Sha256:
 		h = sha256.New()
 	}
 	pass := []byte(password)
@@ -630,7 +630,7 @@ func passwordToKey(proto AuthProtocol, password string, engineId []byte, isAES b
 		switch proto {
 		case Md5:
 			h2 = md5.New()
-		case Sha:
+		case Sha256:
 			h2 = sha256.New()
 		}
 		h2.Write(h.Sum(nil))

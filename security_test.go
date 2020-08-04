@@ -31,7 +31,7 @@ func TestPasswordToKey(t *testing.T) {
 		0x66, 0x95, 0xfe, 0xbc, 0x92, 0x88, 0xe3, 0x62, 0x82, 0x23,
 		0x5f, 0xc7, 0x15, 0x1f, 0x12, 0x84, 0x97, 0xb3, 0x8f, 0x3f,
 	}
-	key = snmpgo.PasswordToKey(snmpgo.Sha, password, engineId)
+	key = snmpgo.PasswordToKey(snmpgo.Sha256, password, engineId)
 	if !bytes.Equal(expBuf, key) {
 		t.Errorf("passwordToKey(Aes) - expected [%s], actual [%s]",
 			snmpgo.ToHexStr(expBuf, " "), snmpgo.ToHexStr(key, " "))
@@ -45,7 +45,7 @@ func TestCipher(t *testing.T) {
 	engineBoots := int32(100)
 	engineTime := int32(1234567)
 
-	key := snmpgo.PasswordToKey(snmpgo.Sha, password, engineId)
+	key := snmpgo.PasswordToKey(snmpgo.Sha256, password, engineId)
 
 	cipher, priv, err := snmpgo.EncryptDES(original, key, engineBoots, 100)
 	if err != nil {

@@ -95,7 +95,7 @@ func (a *SecurityEntry) validate() error {
 					Message: "AuthPassword is at least 8 characters in length",
 				}
 			}
-			if p := a.AuthProtocol; p != Md5 && p != Sha {
+			if p := a.AuthProtocol; p != Md5 && p != Sha256 {
 				return &ArgumentError{
 					Value:   a.AuthProtocol,
 					Message: "Illegal AuthProtocol",
@@ -104,7 +104,7 @@ func (a *SecurityEntry) validate() error {
 		}
 		if a.SecurityLevel > AuthNoPriv {
 			// RFC3414 Section 11.2
-			fmt.Println("password",a.PrivPassword)
+			fmt.Println("password", a.PrivPassword)
 			if len(a.PrivPassword) < 8 {
 				return &ArgumentError{
 					Value:   a.PrivPassword,

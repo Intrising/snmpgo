@@ -76,7 +76,7 @@ func (a *SNMPArguments) validate() error {
 					Message: "AuthPassword is at least 8 characters in length",
 				}
 			}
-			if p := a.AuthProtocol; p != Md5 && p != Sha {
+			if p := a.AuthProtocol; p != Md5 && p != Sha256 {
 				return &ArgumentError{
 					Value:   a.AuthProtocol,
 					Message: "Illegal AuthProtocol",

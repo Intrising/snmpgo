@@ -46,7 +46,7 @@ func main() {
 		UserName:         "user",
 		SecurityLevel:    snmpgo.AuthPriv,
 		AuthPassword:     "88888888",
-		AuthProtocol:     snmpgo.Sha,
+		AuthProtocol:     snmpgo.Sha256,
 		PrivPassword:     "88888888",
 		PrivProtocol:     snmpgo.Aes256,
 		SecurityEngineId: "8000000004736e6d70676f",

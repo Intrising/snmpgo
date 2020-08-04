@@ -14,7 +14,7 @@ func main() {
 		UserName:      "MyName",
 		SecurityLevel: snmpgo.AuthPriv,
 		AuthPassword:  "aaaaaaaa",
-		AuthProtocol:  snmpgo.Sha,
+		AuthProtocol:  snmpgo.Sha256,
 		PrivPassword:  "bbbbbbbb",
 		PrivProtocol:  snmpgo.Aes,
 	})
