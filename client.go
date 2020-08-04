@@ -153,7 +153,7 @@ func (s *SNMP) Open() (err error) {
 
 // Close a connection
 func (s *SNMP) Close() {
-	fmt.Println("Close")
+	// fmt.Println("Close")
 	if s.conn != nil {
 		s.conn.Close()
 		s.conn = nil
