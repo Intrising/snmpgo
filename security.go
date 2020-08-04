@@ -529,10 +529,6 @@ func decryptDES(src, key, privParam []byte) (dst []byte, err error) {
 func encryptAES(src, key []byte, engineBoots, engineTime int32, salt int64, chiperKey int) (
 	dst, privParam []byte, err error) {
 	// fmt.Println("=======LEN:", len(key), key)
-	key2 := make([]byte, 32)
-	for i, val := range key {
-		key2[i] = val
-	}
 	// if chiperKey > aes.BlockSize {
 	// 	sub := chiperKey - aes.BlockSize
 	// 	for i := aes.BlockSize; i < chiperKey; i++ {
