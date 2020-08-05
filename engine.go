@@ -20,27 +20,27 @@ func (e *snmpEngine) SendPdu(pdu Pdu, conn net.Conn, args *SNMPArguments) (resul
 	var sendMsg message
 	sendMsg, err = e.mp.PrepareOutgoingMessage(e.sec, pdu, args)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	var buf []byte
 	buf, err = sendMsg.Marshal()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	if err = conn.SetDeadline(time.Now().Add(args.Timeout)); err != nil {
-		return
+		return nil, err
 	}
 	_, err = conn.Write(buf)
 	if !confirmedType(pdu.PduType()) || err != nil {
-		return
+		return nil, err
 	}
 
 	buf = make([]byte, size)
 	_, err = conn.Read(buf)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	var recvMsg message
@@ -53,6 +53,9 @@ func (e *snmpEngine) SendPdu(pdu Pdu, conn net.Conn, args *SNMPArguments) (resul
 	}
 
 	result, err = e.mp.PrepareDataElements(e.sec, recvMsg, sendMsg)
+	if err != nil {
+		return nil, err
+	}
 	if result != nil && len(pdu.VarBinds()) > 0 {
 		if err = e.checkPdu(result, args); err != nil {
 			result = nil
