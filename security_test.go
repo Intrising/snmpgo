@@ -304,7 +304,7 @@ func TestUsmTimeliness(t *testing.T) {
 	sec.AuthEngineTime = 1150
 	err = sec.CheckTimeliness(0, 999)
 	if err == nil {
-		t.Error("Timeliness() - lose authEngineTime")
+		t.Error("Timeliness() - lose AuthEngineTime")
 	}
 
 	err = sec.CheckTimeliness(0, 1000)
