@@ -15,7 +15,7 @@ func main() {
 		Address:          "192.168.17.51:162",
 		Retries:          1,
 		UserName:         "user",
-		SecurityLevel:    snmpgo.AuthNoPriv,
+		SecurityLevel:    snmpgo.AuthPriv,
 		AuthPassword:     "88888888",
 		AuthProtocol:     snmpgo.Sha256,
 		PrivPassword:     "88888888",
