@@ -30,7 +30,7 @@ type SNMPArguments struct {
 	ContextName      string        // Context name (V3 specific)
 
 	authEngineBoots int
-	authEngineTime  int
+	AuthEngineTime  int
 }
 
 func (a *SNMPArguments) setDefault() {
@@ -382,10 +382,10 @@ func (s *SNMP) V2TrapWithBootsTime(varBinds VarBinds, eBoots, eTime int) error {
 
 	defer func() {
 		s.args.authEngineBoots = 0
-		s.args.authEngineTime = 0
+		s.args.AuthEngineTime = 0
 	}()
 	s.args.authEngineBoots = eBoots
-	s.args.authEngineTime = eTime
+	s.args.AuthEngineTime = eTime
 	return s.v2trap(SNMPTrapV2, varBinds)
 }
 
