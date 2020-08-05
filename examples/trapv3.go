@@ -12,7 +12,7 @@ func main() {
 	// if you want to suppress this behavior.
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
 		Version:          snmpgo.V3,
-		Address:          "127.0.0.1:162",
+		Address:          "192.168.17.51:162",
 		Retries:          1,
 		UserName:         "user",
 		SecurityLevel:    snmpgo.AuthNoPriv,

@@ -191,6 +191,7 @@ func (mp *messageProcessingV3) PrepareDataElements(
 	}
 
 	pdu, _ := recvMsg.Pdu().(*ScopedPdu)
+	pdu.pduType = Report //fix Inform V3
 	if sm != nil {
 		switch t := pdu.PduType(); t {
 		case GetResponse:
