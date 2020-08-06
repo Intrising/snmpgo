@@ -2,6 +2,7 @@ package snmpgo
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 )
 
@@ -154,7 +155,7 @@ func (mp *messageProcessingV3) PrepareResponseMessage(
 	sec security, pdu Pdu, recvMsg message) (message, error) {
 
 	// TODO support for response message of v3
-	return nil, nil
+	return nil, errors.New("Not support message of v3")
 }
 
 func (mp *messageProcessingV3) PrepareDataElements(
