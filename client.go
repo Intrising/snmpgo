@@ -357,7 +357,9 @@ func (s *SNMP) V1Trap(varPduV1 TrapPduV1) (err error) {
 
 	s.conn.SetWriteDeadline(time.Now().Add(s.args.Timeout))
 	_, err = s.conn.Write(marbuf[:len(marbuf)])
-	fmt.Println("err = ", err)
+	if err != nil {
+		fmt.Println("err = ", err)
+	}
 	return err
 }
 
