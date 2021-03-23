@@ -47,7 +47,7 @@ func (e *snmpEngine) SendPdu(pdu Pdu, conn net.Conn, args *SNMPArguments) (resul
 	if recvMsg, _, err = unmarshalMessage(buf); err != nil {
 		return nil, &MessageError{
 			Cause:   err,
-			Message: "Failed to Unmarshal messageAAA",
+			Message: "Failed to Unmarshal message",
 			Detail:  fmt.Sprintf("message Bytes - [%s]", toHexStr(buf, " ")),
 		}
 	}

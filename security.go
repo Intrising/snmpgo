@@ -318,11 +318,11 @@ func (u *usm) Discover(snmp *SNMP) (err error) {
 
 	if u.DiscoveryStatus == noSynchronized && snmp.args.SecurityLevel > NoAuthNoPriv {
 		// Send an empty Pdu
-		pdu := NewPdu(snmp.args.Version, GetRequest)
-		_, err = snmp.sendPdu(pdu)
-		if err != nil {
-			return
-		}
+		// pdu := NewPdu(snmp.args.Version, GetRequest)
+		// _, err = snmp.sendPdu(pdu)
+		// if err != nil {
+		// 	return
+		// }
 	}
 
 	return
